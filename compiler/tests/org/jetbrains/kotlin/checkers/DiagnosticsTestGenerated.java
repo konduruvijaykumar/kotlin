@@ -5610,6 +5610,12 @@ public class DiagnosticsTestGenerated extends AbstractDiagnosticsTest {
                     doTest(fileName);
                 }
 
+                @TestMetadata("diagnosticForUninferredType.kt")
+                public void testDiagnosticForUninferredType() throws Exception {
+                    String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/declarationChecks/destructuringDeclarations/diagnosticForUninferredType.kt");
+                    doTest(fileName);
+                }
+
                 @TestMetadata("DoubleDeclForLoop.kt")
                 public void testDoubleDeclForLoop() throws Exception {
                     String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/declarationChecks/destructuringDeclarations/DoubleDeclForLoop.kt");
