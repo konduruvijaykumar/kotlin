@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 JetBrains s.r.o.
+ * Copyright 2010-2017 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,7 +188,7 @@ class TowerResolver {
         }
 
         for (candidatesGroup in candidatesGroups) {
-            resultCollector.pushCandidates(candidatesGroup)
+            resultCollector.pushCandidates(candidatesGroup, towerData is TowerData.OnlyImplicitReceiver)
             resultCollector.getSuccessfulCandidates()?.let { return it }
         }
 
@@ -201,14 +201,14 @@ class TowerResolver {
 
         abstract fun getFinalCandidates(): Collection<C>
 
-        fun pushCandidates(candidates: Collection<C>) {
+        fun pushCandidates(candidates: Collection<C>, onlyImplicitReceiver: Boolean = false) {
             val filteredCandidates = candidates.filter {
                 getStatus(it).resultingApplicability != ResolutionCandidateApplicability.HIDDEN
             }
-            if (filteredCandidates.isNotEmpty()) addCandidates(filteredCandidates)
+            if (filteredCandidates.isNotEmpty()) addCandidates(filteredCandidates, onlyImplicitReceiver)
         }
 
-        protected abstract fun addCandidates(candidates: Collection<C>)
+        protected abstract fun addCandidates(candidates: Collection<C>, onlyImplicitReceiver: Boolean)
     }
 
     class AllCandidatesCollector<C>(getStatus: (C) -> ResolutionCandidateStatus): ResultCollector<C>(getStatus) {
@@ -218,7 +218,7 @@ class TowerResolver {
 
         override fun getFinalCandidates(): Collection<C> = allCandidates
 
-        override fun addCandidates(candidates: Collection<C>) {
+        override fun addCandidates(candidates: Collection<C>, onlyImplicitReceiver: Boolean) {
             allCandidates.addAll(candidates)
         }
     }
@@ -239,9 +239,9 @@ class TowerResolver {
 
         override fun getFinalCandidates() = getResolved() ?: getResolvedLowPriority() ?: getErrors() ?: emptyList()
 
-        override fun addCandidates(candidates: Collection<C>) {
+        override fun addCandidates(candidates: Collection<C>, onlyImplicitReceiver: Boolean) {
             val minimalLevel = candidates.map { getStatus(it).resultingApplicability }.min()!!
-            if (currentLevel == null || currentLevel!! > minimalLevel) {
+            if (currentLevel == null || currentLevel!! > minimalLevel || onlyImplicitReceiver) {
                 currentLevel = minimalLevel
                 currentCandidates = candidates.filter { getStatus(it).resultingApplicability == minimalLevel }
             }
